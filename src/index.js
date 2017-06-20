@@ -76,12 +76,16 @@ function displayRepos (dir) {
           fetchRepoData(shortUrl).then((repoData) => {
             var description = repoData && repoData.description ? repoData.description : 'No description available'
             var issueCount = repoData && repoData.open_issues ? repoData.open_issues : 0
+            var issuesUrl = repoData && repoData.html_url ? `${repoData.html_url}/issues` : ''
+            var language = repoData && repoData.language ? repoData.language : 'unknown'
 
             var issueStatus = null
+
             var repoDir = path.join(dir, file)
 
             displayReadme(repoDir, (err, result) => {
               var readmeStatus = !err && result ? 'green' : 'red'
+              var readmeUrl = repoData && repoData.html_url && result ? `${repoData.html_url}/blob/master/README.md` : ''
               if (issueCount > 30) {
                 issueStatus = 'red'
               } else if (issueCount > 10) {
@@ -105,14 +109,21 @@ function displayRepos (dir) {
                 .appendTo(li)
                 .addClass('link')
 
-              $('<div/>')
-                .addClass(`status ${readmeStatus}`)
-                .text('readme')
+              $('<a/>')
+                .addClass(`badge ${readmeStatus}`)
+                .html(`<i class="fa fa-file-text" aria-hidden="true"></i> readme`)
+                .prop('href', readmeUrl)
+                .appendTo(li)
+
+              $('<a/>')
+                .addClass(`badge ${issueStatus}`)
+                .html(`<i class="fa fa-bug" aria-hidden="true"></i> ${issueCount} issues`)
+                .prop('href', issuesUrl)
                 .appendTo(li)
 
               $('<div/>')
-                .addClass(`status ${issueStatus}`)
-                .text(`issues: ${issueCount}`)
+                .addClass('badge')
+                .text(language)
                 .appendTo(li)
 
               $('<p/>')

@@ -69,8 +69,9 @@ body {
 .repo-item a {
     color: white;
     margin-left: 8px;
+    text-decoration: none;
 }
-.repo-item .status {
+.repo-item .badge {
     padding: 2px 10px;
     font-size: 12px;
     font-weight: normal;
@@ -80,15 +81,16 @@ body {
     display: inline-block;
     margin-right: 5px;
     font-weight: bold;
+    background: darkgrey;
 }
 
-.repo-item .status.green {
+.repo-item .badge.green {
     background: #690;
 }
-.repo-item .status.orange {
+.repo-item .badge.orange {
     background: #f4511e;
 }
-.repo-item .status.red {
+.repo-item .badge.red {
     background: #bf200f;
 }
 
