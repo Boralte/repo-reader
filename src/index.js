@@ -18,7 +18,7 @@ console.log(githubToken)
 $(() => {
     $('#pickRepo').click(function () {
         dialog.showOpenDialog({properties: ['openDirectory']}, (dir) => {
-            displayRepo(dir[0])
+            displayRepos(dir[0])
         })
     })
 })
@@ -52,10 +52,10 @@ function isDirectory(dir, file, callback) {
 
 }
 
-function displayRepo(dir){
+function displayRepos(dir){
     
     const cList = $('#repoList')
-
+    cList.empty()
     fs.readdir(dir, (err, files) => {
         $.each(files, (i, file) => {
 
