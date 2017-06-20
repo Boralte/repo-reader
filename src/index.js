@@ -72,7 +72,13 @@ function displayRepos(dir){
                     console.log(`stdout: ${stdout}`)
                     console.log(`stderr: ${stderr}`)
 
-                    var shortUrl = consoleResult.substring(19)
+                    // var shortUrl = consoleResult.split('github.com/')[1]
+                    // shortUrl = shortUrl.split('.git')[0]
+
+                    var shortUrl = consoleResult.replace(/.*(github.com\/)/,'').replace('.git','')
+
+
+                    console.log(shortUrl)
 
                     fetchRepoData(shortUrl).then((repoData) => {
 
