@@ -1,11 +1,16 @@
 .title {
-    text-align: 'center';
+    font-family: sans-serif;
+    text-align: center;
+}
 
+.dirButton {
+    text-align: center;
+    margin: center;
 }
 
 .readme-item {
     list-style: none;
-    margin: 5px;
+    margin: center;
 }
 
 .readme-item .status {
