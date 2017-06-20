@@ -1,16 +1,63 @@
+body {
+    background: #2d2d2d;
+}
+
 .title {
     font-family: sans-serif;
+    color: #e5e8e8;
     text-align: center;
 }
 
 .dirButton {
-    text-align: center;
-    margin: center;
+  display: inline-block;
+  border-radius: 2px;
+  background-color: #f4511e;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 14px;
+  padding: 10px;
+  transition: all 0.5s;
+  cursor: pointer;
+  display: block;
+  margin: 10px auto;
+}
+
+.dirButton span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.dirButton span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -10px;
+  transition: 0.5s;
+}
+
+.dirButton:hover span {
+  padding-right: 13px;
+}
+
+.dirButton:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+#repoList {
+    margin-top: 30px;
 }
 
 .readme-item {
     list-style: none;
-    margin: center;
+    margin: 10px auto;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e5e8e8;
+    font-family: sans-serif;
+    padding: 5px;
 }
 
 .readme-item .status {
@@ -29,4 +76,26 @@
 .readme-item .status.no-readme {
     background-color: red;
     box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, red 0 2px
+}
+
+.readme-item a {
+    color: rgb(113, 141, 183)
+}
+.readme-item h3:after {
+    content: "readme";
+    padding: 2px 10px;
+    margin-left: 10px;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.readme-item h3.has-readme:after {
+    background: #690;
+}
+.readme-item h3.no-readme:after {
+    background: red;
+}
+
+.readme-item p {
+    font-size: 14;
 }

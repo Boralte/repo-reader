@@ -76,7 +76,7 @@ function displayRepos (dir) {
           var description = null
           fetchRepoData(shortUrl).then((repoData) => {
             if (repoData && repoData.description) {
-              description = `Description: ${repoData.description}`
+              description = repoData.description
             } else {
               description = 'No description available'
             }
@@ -92,13 +92,10 @@ function displayRepos (dir) {
                 .attr('role', 'menuitem')
                 .prependTo(cList)
 
-              var header = $('<h2/>')
+              $('<h3/>')
                 .text(`${file}`)
+                .addClass(`${status}`)
                 .appendTo(li)
-
-              $('<span/>')
-                .addClass(`status ${status}`)
-                .prependTo(header)
 
               $('<a/>')
                 .text(consoleResult)
