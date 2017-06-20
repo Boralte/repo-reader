@@ -8,7 +8,7 @@ body {
     text-align: center;
 }
 
-.dirButton {
+.dir-button {
   display: inline-block;
   border-radius: 2px;
   background-color: #f4511e;
@@ -23,14 +23,14 @@ body {
   margin: 10px auto;
 }
 
-.dirButton span {
+.dir-button span {
   cursor: pointer;
   display: inline-block;
   position: relative;
   transition: 0.5s;
 }
 
-.dirButton span:after {
+.dir-button span:after {
   content: '\00bb';
   position: absolute;
   opacity: 0;
@@ -39,63 +39,66 @@ body {
   transition: 0.5s;
 }
 
-.dirButton:hover span {
+.dir-button:hover span {
   padding-right: 13px;
 }
 
-.dirButton:hover span:after {
+.dir-button:hover span:after {
   opacity: 1;
   right: 0;
 }
-#repoList {
+#repo-list {
     margin-top: 30px;
 }
 
-.readme-item {
+.repo-item {
     list-style: none;
     margin: 10px auto;
     background: rgba(255, 255, 255, 0.05);
     color: #e5e8e8;
     font-family: sans-serif;
-    padding: 5px;
+    padding: 10px;
+    position: relative;
+    max-width: 600px;
 }
 
-.readme-item .status {
-    width: 12px;
-    height: 12px;
-    display: inline-block;
-    border-radius: 50%;
-    margin-right: 5px;
+.repo-item h2 {
+    margin-top: 0;
 }
 
-.readme-item .status.has-readme {
-    background-color: #690;
-    box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, #7D0 0 2px
+.repo-item a {
+    color: white;
+    margin-left: 8px;
 }
-
-.readme-item .status.no-readme {
-    background-color: red;
-    box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, red 0 2px
-}
-
-.readme-item a {
-    color: rgb(113, 141, 183)
-}
-.readme-item h3:after {
-    content: "readme";
+.repo-item .status {
     padding: 2px 10px;
-    margin-left: 10px;
     font-size: 12px;
     font-weight: normal;
+    border-radius: 3px;
+    top: -10px;
+    position: relative;
+    display: inline-block;
+    margin-right: 5px;
+    font-weight: bold;
 }
 
-.readme-item h3.has-readme:after {
+.repo-item .status.green {
     background: #690;
 }
-.readme-item h3.no-readme:after {
-    background: red;
+.repo-item .status.orange {
+    background: #f4511e;
+}
+.repo-item .status.red {
+    background: #bf200f;
 }
 
-.readme-item p {
+.repo-item p {
     font-size: 14;
+}
+
+.repo-item .link {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 2.5em;
 }

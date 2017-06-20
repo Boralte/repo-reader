@@ -73,34 +73,48 @@ function displayRepos (dir) {
 
           var shortUrl = consoleResult.replace(/.*(github.com\/)/, '').replace('.git', '')
           console.log(shortUrl)
-          var description = null
           fetchRepoData(shortUrl).then((repoData) => {
-            if (repoData && repoData.description) {
-              description = repoData.description
-            } else {
-              description = 'No description available'
-            }
+            var description = repoData && repoData.description ? repoData.description : 'No description available'
+            var issueCount = repoData && repoData.open_issues ? repoData.open_issues : 0
 
-            var status
-
+            var issueStatus = null
             var repoDir = path.join(dir, file)
 
             displayReadme(repoDir, (err, result) => {
-              status = !err && result ? 'has-readme' : 'no-readme'
+              var readmeStatus = !err && result ? 'green' : 'red'
+              if (issueCount > 30) {
+                issueStatus = 'red'
+              } else if (issueCount > 10) {
+                issueStatus = 'orange'
+              } else {
+                issueStatus = 'green'
+              }
+
               var li = $('<div/>')
-                .addClass('readme-item')
+                .addClass('repo-item')
                 .attr('role', 'menuitem')
                 .prependTo(cList)
 
-              $('<h3/>')
+              $('<h2/>')
                 .text(`${file}`)
-                .addClass(`${status}`)
                 .appendTo(li)
 
               $('<a/>')
-                .text(consoleResult)
+                .html(`<i class="fa fa-github-square" aria-hidden="true"></i>`)
                 .prop('href', consoleResult)
                 .appendTo(li)
+                .addClass('link')
+
+              $('<div/>')
+                .addClass(`status ${readmeStatus}`)
+                .text('readme')
+                .appendTo(li)
+
+              $('<div/>')
+                .addClass(`status ${issueStatus}`)
+                .text(`issues: ${issueCount}`)
+                .appendTo(li)
+
               $('<p/>')
                 .text(description)
                 .appendTo(li)
