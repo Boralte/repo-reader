@@ -1,0 +1,27 @@
+.title {
+    text-align: 'center';
+
+}
+
+.readme-item {
+    list-style: none;
+    margin: 5px;
+}
+
+.readme-item .status {
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.readme-item .status.has-readme {
+    background-color: #690;
+    box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, #7D0 0 2px
+}
+
+.readme-item .status.no-readme {
+    background-color: red;
+    box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, red 0 2px
+}
