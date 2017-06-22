@@ -3,7 +3,7 @@ const { shell } = require('electron')
 const exec = require('child_process').exec
 const request = require('request')
 const process = require('process')
-
+const async = require('async')
 const fs = require('fs')
 const path = require('path')
 var $ = window.$ = require('jquery')
@@ -25,30 +25,82 @@ $(() => {
   })
 })
 
-// function isDir (dir, file) {
-//   const fileDir = dir + '/' + file
-//   console.log(fileDir)
-//   return new Promise((resolve, reject) => {
-//     fs.stat(fileDir, (err, xFile) => {
-//       if (xFile.isDirectory()) {
-//         console.log('true')
-//         return resolve()
-//       } else {
-//         return reject(new Error('Not a directory'))
-//       }
-//     })
-//   })
-// }
+function formatBytes (bytes) {
+  if (bytes < 1024) return bytes + ' bytes'
+  else if (bytes < 1048576) return (bytes / 1024).toFixed(0) + ' KB'
+  else if (bytes < 1073741824) return (bytes / 1048576).toFixed(0) + ' MB'
+  else return (bytes / 1073741824).toFixed(0) + ' GB'
+};
 
-function isDirectory (dir, file, callback) {
-  const fileDir = dir + '/' + file
-  console.log(fileDir)
-  fs.stat(fileDir, (err, xFile) => {
+function isDirectory (filePath, callback) {
+  console.log(filePath)
+  fs.stat(filePath, (err, xFile) => {
     if (!err && xFile.isDirectory()) {
       callback(null, true)
     } else {
       callback(new Error('Not a directory'), false)
     }
+  })
+}
+
+function isRepo (filePath, callback) {
+  exec(`cd "${filePath}" && git status`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(filePath, `exec error: ${error}`)
+      callback(new Error('Not a directory'), false)
+    } else {
+      callback(null, true)
+    }
+  })
+}
+
+function readSize (item, cb) {
+  fs.lstat(item, function (err, stats) {
+    if (!err && stats.isDirectory()) {
+      var total = stats.size
+
+      fs.readdir(item, function (err, list) {
+        if (err) return cb(err)
+
+        async.forEach(
+          list,
+          function (diritem, callback) {
+            readSize(path.join(item, diritem), function (err, size) {
+              total += size
+              callback(err)
+            })
+          },
+          function (err) {
+            cb(err, total)
+          }
+        )
+      })
+    } else {
+      cb(err)
+    }
+  })
+}
+function fetchRepoData (shortUrl) {
+  return new Promise((resolve, reject) => {
+    var options = {
+      url: `https://api.github.com/repos/${shortUrl}`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36',
+        'Authorization': `token ${githubToken}`
+      }
+    }
+    request(options, (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        var data = JSON.parse(body)
+
+        console.log(body)
+        console.log(data.description)
+        console.log(data.open_issues)
+      } else {
+        console.log('GitHub status: ' + response.statusCode)
+      }
+      return resolve(data)
+    })
   })
 }
 
@@ -58,96 +110,127 @@ function displayRepos (dir) {
   fs.readdir(dir, (err, files) => {
     if (err) return
     $.each(files, (i, file) => {
-      isDirectory(dir, file, (err, result) => {
+      // Figure out what this is let directoryInfo = {}
+
+      const filePath = path.join(dir, file)
+      isDirectory(filePath, (err, result) => {
         if (err && !result) return
-        console.log('Adding to list')
-        var consoleResult
-        exec(`cd ${dir}/${file} && git config --get remote.origin.url`, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`)
-            return
-          }
-          consoleResult = stdout
-          // var shortUrl = consoleResult.split('github.com/')[1]
-          // shortUrl = shortUrl.split('.git')[0]
+        isRepo(filePath, (err, result) => {
+          // Handle error and callback
+          // Split code to allow non git repos to be displayed
+          console.log('Adding to list')
+          var consoleResult
+          var shortUrl
+          exec(`cd ${filePath} && git config --get remote.origin.url`, (error, stdout, stderr) => {
+            if (error) {
+              console.error(`exec error: ${error}`)
+              consoleResult = 'https://github.com/404'
+              shortUrl = 'https://github.com/404'
+            } else {
+              consoleResult = stdout
+              shortUrl = consoleResult.replace(/.*(github.com\/)/, '').replace('.git', '')
+              console.log(shortUrl)
+            }
+            fetchRepoData(shortUrl).then((repoData) => {
+              var description = repoData && repoData.description ? repoData.description : 'No description available'
+              var issueCount = repoData && repoData.open_issues ? repoData.open_issues : 'n/a'
+              var issuesUrl = repoData && repoData.html_url ? `${repoData.html_url}/issues` : consoleResult
+              var language = repoData && repoData.language ? repoData.language : 'unknown'
+              var homeLink = repoData && repoData.homepage ? repoData.homepage : consoleResult
+              var stars = repoData && repoData.stargazers_count ? repoData.stargazers_count : 'n/a'
+              var starLink = repoData && repoData.html_url ? `${repoData.html_url}/stargazers` : consoleResult
+              var watchers = repoData && repoData.watchers_count ? repoData.watchers_count : 'n/a'
+              var watcherLink = repoData && repoData.html_url ? `${repoData.html_url}/watchers` : consoleResult
+              var size = repoData && repoData.size ? formatBytes(repoData.size) : '0 MB'
 
-          var shortUrl = consoleResult.replace(/.*(github.com\/)/, '').replace('.git', '')
-          console.log(shortUrl)
-          fetchRepoData(shortUrl).then((repoData) => {
-            var description = repoData && repoData.description ? repoData.description : 'No description available'
-            var issueCount = repoData && repoData.open_issues ? repoData.open_issues : 0
-            var issuesUrl = repoData && repoData.html_url ? `${repoData.html_url}/issues` : ''
-            var language = repoData && repoData.language ? repoData.language : 'unknown'
+              if (consoleResult !== 'https://github.com/404' && issueCount === 'n/a') issueCount = '0'
+              // readSize(filePath, (err, callback) => {
+              //   size = !err && callback ? formatBytes(callback) : 'n/a MB'
+              //   if (err) console.log('Size Error =========== ' + err)
+              //   console.log(size)
 
-            var issueStatus = null
+              // exec(`cd ${filePath} && du -sh`, (error, stdout, stderr) => {
+                // if (!error && stdout) {
+                  // size = stdout
+                // } else if (error) {
+                  // console.log('Size finding error:' + error)
+                // }
+              var issueStatus = null
 
-            var repoDir = path.join(dir, file)
+              displayReadme(filePath, (err, result) => {
+                var readmeStatus = !err && result ? 'green' : 'red'
+                var readmeUrl = repoData && repoData.html_url && result ? `${repoData.html_url}/blob/master/README.md` : consoleResult
+                if (issueCount > 50) {
+                  issueStatus = 'red'
+                } else if (issueCount > 10) {
+                  issueStatus = 'orange'
+                } else if (issueCount <= 10) {
+                  issueStatus = 'green'
+                } else {
+                  issueStatus = 'gray'
+                }
 
-            displayReadme(repoDir, (err, result) => {
-              var readmeStatus = !err && result ? 'green' : 'red'
-              var readmeUrl = repoData && repoData.html_url && result ? `${repoData.html_url}/blob/master/README.md` : ''
-              if (issueCount > 30) {
-                issueStatus = 'red'
-              } else if (issueCount > 10) {
-                issueStatus = 'orange'
-              } else {
-                issueStatus = 'green'
-              }
 
-              var li = $('<div/>')
-                .addClass('repo-item')
-                .attr('role', 'menuitem')
-                .prependTo(cList)
+                var li = $('<div/>')
+                  .addClass(`repo-item ${issueStatus}`)
+                  .attr('role', 'menuitem')
+                  .prependTo(cList)
 
-              $('<h2/>')
-                .text(`${file}`)
-                .appendTo(li)
+                $('<a/>')
+                  .addClass('header')
+                  .text(`${file}`)
+                  .prop('href', homeLink)
+                  .appendTo(li)
+                if (consoleResult !== 'https://github.com/404') {
+                  $('<a/>')
+                    .addClass('link')
+                    .html(`<i class="fa fa-github-square" aria-hidden="true"></i>`)
+                    .prop('href', consoleResult)
+                    .appendTo(li)
+                }
 
-              $('<a/>')
-                .html(`<i class="fa fa-github-square" aria-hidden="true"></i>`)
-                .prop('href', consoleResult)
-                .appendTo(li)
-                .addClass('link')
+                $('<a/>')
+                  .addClass(`badge ${readmeStatus}`)
+                  .html(`<i class="fa fa-file-text" aria-hidden="true"></i> readme`)
+                  .prop('href', readmeUrl)
+                  .appendTo(li)
 
-              $('<a/>')
-                .addClass(`badge ${readmeStatus}`)
-                .html(`<i class="fa fa-file-text" aria-hidden="true"></i> readme`)
-                .prop('href', readmeUrl)
-                .appendTo(li)
+                $('<a/>')
+                  .addClass(`badge ${issueStatus}`)
+                  .html(`<i class="fa fa-bug" aria-hidden="true"></i> ${issueCount} issues`)
+                  .prop('href', issuesUrl)
+                  .appendTo(li)
 
-              $('<a/>')
-                .addClass(`badge ${issueStatus}`)
-                .html(`<i class="fa fa-bug" aria-hidden="true"></i> ${issueCount} issues`)
-                .prop('href', issuesUrl)
-                .appendTo(li)
+                $('<div/>')
+                  .addClass('badge')
+                  .text(language)
+                  .appendTo(li)
 
-              $('<div/>')
-                .addClass('badge')
-                .text(language)
-                .appendTo(li)
+                $('<a/>')
+                  .addClass('badge star')
+                  .html(`<i class="fa fa-star" aria-hidden="true"></i> ${stars}`)
+                  .prop('href', starLink)
+                  .appendTo(li)
 
-              $('<p/>')
-                .text(description)
-                .appendTo(li)
+                $('<a/>')
+                  .addClass('badge watch')
+                  .html(`<i class="fa fa-eye" aria-hidden="true"></i> ${watchers}`)
+                  .prop('href', watcherLink)
+                  .appendTo(li)
+
+                $('<div/>')
+                  .addClass('badge size')
+                  .text(size)
+                  .appendTo(li)
+
+                $('<p/>')
+                  .text(description)
+                  .appendTo(li)
+              })
             })
           })
         })
       })
-
-      // isDir(dir, file).then(()=> {
-      //     console.log('Adding to list')
-      //     var li = $('<li/>')
-      //         .addClass('ui-menu-item')
-      //         .attr('role', 'menuitem')
-      //         .prependTo(cList);
-      //     var aaa = $('<a/>')
-      //         .addClass('ui-all')
-      //         .text(`Name: ${file}`)
-      //         .appendTo(li);
-      //     displayReadme(file)
-      // }).catch((err) => {
-      //     console.log(err)
-      // })
     })
   })
 }
@@ -170,42 +253,5 @@ function displayReadme (dir, callback) {
     } else {
       callback(new Error('No readme found'), false)
     }
-  })
-}
-
-// function addButton(type, filePath){
-//     var button = document.createElement('button')
-//     button.type = type
-//     button.value = 'Readme'
-//     button.name = 'Readme'
-//     button.text = 'Display Readme'
-//     button.onclick = function(){
-//         console.log(filePath)
-//     }
-//     var foo = document.getElementById("fooBar");
-//     foo.appendChild(button);
-// }
-
-function fetchRepoData (shortUrl) {
-  return new Promise((resolve, reject) => {
-    var options = {
-      url: `https://api.github.com/repos/${shortUrl}`,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36',
-        'Authorization': `token ${githubToken}`
-      }
-    }
-    request(options, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        var data = JSON.parse(body)
-
-        console.log(body)
-        console.log(data.description)
-        console.log(data.open_issues)
-      } else {
-        console.log('GitHub status: ' + response.statusCode)
-      }
-      return resolve(data)
-    })
   })
 }

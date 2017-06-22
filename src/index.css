@@ -1,8 +1,10 @@
+
 body {
     background: #2d2d2d;
 }
 
 .title {
+    margin-top: 15px;
     font-family: sans-serif;
     color: #e5e8e8;
     text-align: center;
@@ -57,18 +59,33 @@ body {
     background: rgba(255, 255, 255, 0.05);
     color: #e5e8e8;
     font-family: sans-serif;
-    padding: 10px;
+    padding: 15px 20px;
     position: relative;
     max-width: 600px;
 }
 
-.repo-item h2 {
-    margin-top: 0;
+.repo-item.red {
+    border-left: 10px solid #bf200f;
+}
+.repo-item.orange {
+    border-left: 10px solid #f4511e;
+}
+.repo-item.green {
+    border-left: 10px solid #690;
+}
+.repo-item.gray {
+    border-left: 10px solid #9c9c9e;
+}
+
+.repo-item .header {
+    font-size: 1.3em;
+    margin: 10 px;
+    position: absolute;
+    display: inline-block
 }
 
 .repo-item a {
     color: white;
-    margin-left: 8px;
     text-decoration: none;
 }
 .repo-item .badge {
@@ -80,8 +97,9 @@ body {
     position: relative;
     display: inline-block;
     margin-right: 5px;
+    margin-top: 45px;
     font-weight: bold;
-    background: darkgrey;
+    background: #9c9c9e;
 }
 
 .repo-item .badge.green {
@@ -92,6 +110,14 @@ body {
 }
 .repo-item .badge.red {
     background: #bf200f;
+}
+
+.repo-item .badge.watch {
+    background: #17179e;
+}
+
+.repo-item .badge.star {
+    background: #d8a31e;
 }
 
 .repo-item p {

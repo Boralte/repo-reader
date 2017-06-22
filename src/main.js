@@ -1,21 +1,21 @@
-const { app, BrowserWindow, globalShortcut} = require('electron')
+const {app, BrowserWindow} = require('electron')
 
 let mainWindow
 
 app.on('ready', () => {
-    
-    mainWindow = new BrowserWindow( {
-        width:900,
-        height: 900
-    })
+  mainWindow = new BrowserWindow({
+    width: 900,
+    height: 900,
+    minWidth: 550,
+    minHeight: 650
+  })
 
-    const path = `file://${__dirname}/index.html`;
-    mainWindow.openDevTools()
+  const path = `file://${__dirname}/index.html`
+  mainWindow.openDevTools()
 
-    mainWindow.loadURL(path)
+  mainWindow.loadURL(path)
 
-    mainWindow.on('close', _ => {
-        mainWindow = null
-    })
+  mainWindow.on('close', _ => {
+    mainWindow = null
+  })
 })
-
