@@ -1,7 +1,6 @@
 # Repo Reader
 
-Shows repos in a given directory, their readme status and description
-
+Shows all repos in a given directory, and gives relevant colour coded information and links
 # Running locally
 
 1. Clone repo `git clone https://github.com/Boralte/repo-reader.git`
