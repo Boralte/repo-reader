@@ -1,7 +1,7 @@
 {
   "name": "repo-reader",
   "version": "1.0.0",
-  "description": "",
+  "description": "Helps keep track of your repositories, providing valuable information at a glance",
   "main": "src/main.js",
   "scripts": {
     "start": "electron ."

@@ -12,9 +12,7 @@ app.on('ready', () => {
 
   const path = `file://${__dirname}/index.html`
   mainWindow.openDevTools()
-
   mainWindow.loadURL(path)
-
   mainWindow.on('close', _ => {
     mainWindow = null
   })

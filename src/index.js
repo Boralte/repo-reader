@@ -33,7 +33,6 @@ function formatBytes (bytes) {
 };
 
 function isDirectory (filePath, callback) {
-  console.log(filePath)
   fs.stat(filePath, (err, xFile) => {
     if (!err && xFile.isDirectory()) {
       callback(null, true)
@@ -58,10 +57,8 @@ function readSize (item, cb) {
   fs.lstat(item, function (err, stats) {
     if (!err && stats.isDirectory()) {
       var total = stats.size
-
       fs.readdir(item, function (err, list) {
         if (err) return cb(err)
-
         async.forEach(
           list,
           function (diritem, callback) {
@@ -92,10 +89,7 @@ function fetchRepoData (shortUrl) {
     request(options, (error, response, body) => {
       if (!error && response.statusCode === 200) {
         var data = JSON.parse(body)
-
         console.log(body)
-        console.log(data.description)
-        console.log(data.open_issues)
       } else {
         console.log('GitHub status: ' + response.statusCode)
       }
@@ -110,15 +104,11 @@ function displayRepos (dir) {
   fs.readdir(dir, (err, files) => {
     if (err) return
     $.each(files, (i, file) => {
-      // Figure out what this is let directoryInfo = {}
-
       const filePath = path.join(dir, file)
       isDirectory(filePath, (err, result) => {
         if (err && !result) return
         isRepo(filePath, (err, result) => {
-          // Handle error and callback
-          // Split code to allow non git repos to be displayed
-          console.log('Adding to list')
+          if (err) console.log('Is not Repp: ' + err)
           var consoleResult
           var shortUrl
           exec(`cd ${filePath} && git config --get remote.origin.url`, (error, stdout, stderr) => {
@@ -129,7 +119,6 @@ function displayRepos (dir) {
             } else {
               consoleResult = stdout
               shortUrl = consoleResult.replace(/.*(github.com\/)/, '').replace('.git', '')
-              console.log(shortUrl)
             }
             fetchRepoData(shortUrl).then((repoData) => {
               var description = repoData && repoData.description ? repoData.description : 'No description available'
@@ -181,6 +170,7 @@ function displayRepos (dir) {
                   .text(`${file}`)
                   .prop('href', homeLink)
                   .appendTo(li)
+
                 if (consoleResult !== 'https://github.com/404') {
                   $('<a/>')
                     .addClass('link')
@@ -239,7 +229,6 @@ function isReadme (files) {
   const readme = ['readme', 'ReadMe', 'Readme', 'README.md']
   let readmeFile = null
   $.each(files, (i, file) => {
-    console.log(file, readme.includes(file))
     if (readme.includes(file)) readmeFile = file
   })
   return readmeFile
@@ -248,7 +237,6 @@ function isReadme (files) {
 function displayReadme (dir, callback) {
   fs.readdir(dir, (err, files) => {
     if (!err && isReadme(files) != null) {
-      // addButton('button', dir + '/' + file)
       callback(null, true)
     } else {
       callback(new Error('No readme found'), false)
