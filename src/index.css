@@ -100,6 +100,17 @@ body {
     margin-top: 45px;
     font-weight: bold;
     background: #9c9c9e;
+
+    -webkit-transition: all 0.4s ease-in-out;
+    -moz-transition: all 0.4s ease-in-out;
+    -o-transition: all 0.4s ease-in-out;
+    -ms-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+
+.repo-item .badge:hover {
+    box-shadow: 0 7px 13px 0 rgba(0,0,0,0.24);
+    font-size: 13.5px;
 }
 
 .repo-item .badge.green {
@@ -129,4 +140,15 @@ body {
     right: 10px;
     top: 10px;
     font-size: 2.5em;
+
+    -webkit-transition: all 0.4s ease-in-out;
+    -moz-transition: all 0.4s ease-in-out;
+    -o-transition: all 0.4s ease-in-out;
+    -ms-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+
+.repo-item .link:hover {
+    box-shadow: 0 7px 13px 0 rgba(0,0,0,0.24);
+    font-size: 44px;
 }
